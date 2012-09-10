@@ -1,0 +1,108 @@
+<?php
+defined('MOODLE_INTERNAL') || die();
+
+class filter_wowza extends moodle_text_filter {
+    public function filter($text, array $options = array()) {
+        global $CFG, $PAGE;
+
+        if (!is_string($text) or empty($text)) {
+            // non string data can not be filtered anyway
+            return $text;
+        }
+        if (stripos($text, '</a>') === false) {
+            // performance shortcut - all regexes bellow end with the </a> tag,
+            // if not present nothing can match
+            return $text;
+        }
+        if (stripos($text, 'rtmp') === false) {
+            return $text;   // If it lacks rtmp, it can't be the LRZ Wowza sever.
+        }
+
+        $newtext = $text; // we need to return the original value if regex fails!
+
+        $search = '/<a\s[^>]*href="([^"#\?]+\.(mp4|m4v)([#\?][^"]*)?)"[^>]*>([^>]*)<\/a>/is';
+        $newtext = preg_replace_callback($search, 'filter_wowza_callback', $newtext);
+            
+        if (empty($newtext) or $newtext === $text) {
+            // error or not filtered
+            unset($newtext);
+            return $text;
+        }
+        return $newtext;
+     }   
+      
+}        
+        function filter_wowza_callback($link) {
+            global $CFG;
+            static $count = 0;
+
+            $count++;
+            $id = 'filter_wowza_'.time().'_'.$count; //we need something unique because it might be stored in text cache
+
+	//list($urls, $width, $height) = filter_mediaplugin_parse_alternatives($link[1], 0, 0);
+
+            $width  = null;
+            $height = null;
+            $matches = null;
+
+            if (preg_match('/^d=([\d]{1,4})x([\d]{1,4})$/i', $link[1], $matches)) { // #d=640x480
+                $width  = $matches[1];  //this regex doesn't work
+                $height = $matches[2];
+            }
+            if (preg_match('/\?d=([\d]{1,4})x([\d]{1,4})$/i', $link[1], $matches)) { // old style file.ext?d=640x480
+                $width  = $matches[1];
+                $height = $matches[2];
+                $url = str_replace($matches[0], '', $link[1]);
+            }
+
+            $link[1] = str_replace('&amp;', '&', $link[1]);
+            /*   $link[1] = clean_param($link[1], PARAM_URL);
+            if (empty($link[1])) {
+                break;
+            }
+        */
+
+            $autosize = false;
+            if (!$width and !$height) { // There isn't an automatic video size detection yet
+                $width    = 640;
+                $height   = 360;
+                $autosize = true;
+            }
+//var_dump($link);
+            // part the url in its elements
+            $completeURL = parse_url($link[1]); 
+            $streamerprotokoll = $completeURL["scheme"] . "://";
+            $port = ( $completeURL["port"] ) ? ":" . $completeURL["port"] : "";
+            $streamer= $completeURL["host"] . $port .substr($completeURL["path"],0,strpos($completeURL["path"],"/",1)+1);
+            $mediapath = substr($completeURL["path"],strpos($completeURL["path"],"/",1)+1);
+            $playerpath = $CFG->wwwroot . '/filter/wowza'; 
+
+$output = <<<EOT
+<script type="text/javascript">
+var init = function(){
+	flowplayer($id,"$playerpath/flowplayer-3.2.14.swf",{
+			clip: {
+				url: "$mediapath",
+				provider: 'lrzwowza'
+			}, 
+			plugins: { 
+				lrzwowza: {
+				url: "$playerpath/flowplayer.rtmp-3.2.11.swf",
+				netConnectionUrl: "$streamerprotokoll$streamer" 
+				} 
+			}
+		});
+    };
+        document.getElementById("{$id}").focus();
+        document.getElementById("{$id}").click();
+</script>
+<script type="text/javascript">document.addEventListener("load", init, false);</script>
+<script type="text/javascript" src="$playerpath/flowplayer-3.2.11.min.js"></script>
+
+<a id="$id" style="display:block;width:{$width}px;height:{$height}px">Loading the player ...</a>
+
+
+EOT;
+            return $output;
+}
+?>
