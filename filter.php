@@ -72,7 +72,7 @@ class filter_wowza extends moodle_text_filter {
             // part the url in its elements
             $completeURL = parse_url($link[1]); 
             $streamerprotokoll = $completeURL["scheme"] . "://";
-            $port = ( $completeURL["port"] ) ? ":" . $completeURL["port"] : "";
+            $port = ( $completeURL["port"] ) ? ":" . $completeURL["port"] : ":1935";
             $streamer= $completeURL["host"] . $port .substr($completeURL["path"],0,strpos($completeURL["path"],"/",1)+1);
             $mediapath = substr($completeURL["path"],strpos($completeURL["path"],"/",1)+1);
             $mediatype = (stripos($mediapath,"mp4:")===false) ? "mp4:" : ""; 
@@ -84,7 +84,9 @@ class filter_wowza extends moodle_text_filter {
            // $client ='Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.57 Safari/536.11';
 if(!(stripos($client,"iPod")===false)||!(stripos($client,"iPad")===false)||!(stripos($client,"iPhone")===false)){
 $output = <<<EOT
-    <video controls width=$width height=$height src="http://$streamer$mediapath/playlist.m3u8" />
+    <video controls width=$width height=$height src="http://{$streamer}_definst_/$mediatype$mediapath/playlist.m3u8" type="video/mp4" />
+    <p>http://{$streamer}_definst_/$mediatype$mediapath/playlist.m3u8</p>
+    <p>$port--$streamer--$mediapath</p>
 EOT;
 } else {
 $output = <<<EOT
