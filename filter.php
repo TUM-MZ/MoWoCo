@@ -81,12 +81,11 @@ class filter_wowza extends moodle_text_filter {
             $client = $_SERVER["HTTP_USER_AGENT"]; 
             //if(!(stripos($client,"iPod")===false)||!(stripos($client,"iPad")===false)||!(stripos($client,"iPhone")===false)){
             //    $ios = true;
-           // $client ='Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.57 Safari/536.11';
+            //$client ='iPodMozilla/5.0 (X11; Linux x86_64) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.57 Safari/536.11';
 if(!(stripos($client,"iPod")===false)||!(stripos($client,"iPad")===false)||!(stripos($client,"iPhone")===false)){
 $output = <<<EOT
-    <video controls width=$width height=$height src="http://{$streamer}_definst_/$mediatype$mediapath/playlist.m3u8" type="video/mp4" />
-    <p>http://{$streamer}_definst_/$mediatype$mediapath/playlist.m3u8</p>
-    <p>$port--$streamer--$mediapath</p>
+    <video controls width=$width height=$height src="http://{$streamer}_definst_/$mediatype$mediapath/playlist.m3u8" />
+    
 EOT;
 } else {
 $output = <<<EOT
@@ -99,7 +98,8 @@ $output = <<<EOT
 <param name="flashvars" value="config={
 				'clip':{
 					'url':'$mediatype$mediapath',
-					'provider':'lrzwowza'
+					'provider':'lrzwowza',
+                    'autoPlay':false
 				},
 				'plugins': {
 					'lrzwowza': {
