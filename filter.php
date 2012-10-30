@@ -20,9 +20,9 @@ class filter_wowza extends moodle_text_filter {
 
         $newtext = $text; // we need to return the original value if regex fails!
 
-        $search = '/<a\s[^>]*href="([^"#\?]+\.(mp4|m4v)([#\?][^"]*)?)"[^>]*>([^>]*)<\/a>/is';
+        $search = '/<a\s[^>]*href="([^"#\?]+\.(mp4|m4v)([#\?][^"]*)?)"[^>]*>(.*)<\/a>/is';
         $newtext = preg_replace_callback($search, 'filter_wowza_callback', $newtext);
-            
+         
         if (empty($newtext) or $newtext === $text) {
             // error or not filtered
             unset($newtext);
@@ -77,19 +77,24 @@ class filter_wowza extends moodle_text_filter {
             $mediapath = substr($completeURL["path"],strpos($completeURL["path"],"/",1)+1);
             $mediatype = (stripos($mediapath,"mp4:")===false) ? "mp4:" : ""; 
             $playerpath = $CFG->wwwroot . '/filter/wowza'; 
-
+        
+            unset($matches);
+            $posterimage="";
+            if(preg_match_all('/<img\s[^>]*src="([^"#\?]+\.(gif|jpg|png))"[^>]*\/>/is',$link[4],$matches)>=1){
+                $posterimage = $matches[1][0];
+            }
             $client = $_SERVER["HTTP_USER_AGENT"]; 
             //if(!(stripos($client,"iPod")===false)||!(stripos($client,"iPad")===false)||!(stripos($client,"iPhone")===false)){
             //    $ios = true;
             //$client ='iPodMozilla/5.0 (X11; Linux x86_64) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.57 Safari/536.11';
-if(!(stripos($client,"iPod")===false)||!(stripos($client,"iPad")===false)||!(stripos($client,"iPhone")===false)){
+            if(!(stripos($client,"iPod")===false)||!(stripos($client,"iPad")===false)||!(stripos($client,"iPhone")===false)){
 $output = <<<EOT
-    <video controls width=$width height=$height src="http://{$streamer}_definst_/$mediatype$mediapath/playlist.m3u8" />
+    <video controls width=$width height=$height src="http://{$streamer}_definst_/$mediatype$mediapath/playlist.m3u8" poster="$posterimage"/>
     
 EOT;
 } else {
 $output = <<<EOT
-<object  id="player" data="$playerpath/flowplayer-3.2.14.swf" type="application/x-shockwave-flash" width=$width height=$height>
+<p><object  id="player" data="$playerpath/flowplayer-3.2.14.swf" type="application/x-shockwave-flash" width=$width height=$height>
 <param name="allowfullscreen" value="true">
 <param name="allowscriptaccess" value="always">
 <param name="quality" value="high">
@@ -98,19 +103,21 @@ $output = <<<EOT
 <param name="flashvars" value="config={
 				'clip':{
 					'url':'$mediatype$mediapath',
-					'provider':'lrzwowza',
+					'provider':'wowza',
                     'autoPlay':false
-				},
+				}, 'canvas': {
+        'backgroundImage': '$posterimage' },
 				'plugins': {
-					'lrzwowza': {
+					'wowza': {
 						'url':'flowplayer.rtmp-3.2.11.swf',
 						'netConnectionUrl':'$streamerprotokoll$streamer'
 					}
 				}}
 				">
-</object>
+</object></p>
 EOT;
-}
+} 
             return $output;
+            
 }
 ?>
