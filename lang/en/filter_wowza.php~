@@ -1,4 +1,0 @@
-<?php // $Id$
-// Language string for filter/Wowza Connector.
- 
-$string['filtername'] = 'Wowza Connector';
