@@ -13,14 +13,15 @@ class filter_wowza extends moodle_text_filter {
             // performance shortcut - all regexes bellow end with the </a> tag,
             // if not present nothing can match
             return $text;
-        }
+        } /*
         if (stripos($text, 'rtmp') === false) {
             return $text;   // If it lacks rtmp, it can't be the Wowza sever.
-        }
+        } */
 
         $newtext = $text; // we need to return the original value if regex fails!
-
-        $search = '/<a\s[^>]*href="([^"#\?]+\.(mp4|m4v)([#\?][^"]*)?)"[^>]*>(.*)<\/a>/is';
+echo("<!--"); var_dump($text); echo("-->");
+       // $search = '/<a\s[^>]*href="([^"#\?]+\.(mp4|m4v)([#\?][^"]*)?)"[^>]*>(.*)<\/a>/is'; 
+        $search = '~<a\s[^>]*href="([^"]*(?:\.(mp4|m4v))[^"]*)"[^>]*>([^>]*)</a>~is';
         $newtext = preg_replace_callback($search, 'filter_wowza_callback', $newtext);
          
         if (empty($newtext) or $newtext === $text) {
@@ -33,9 +34,13 @@ class filter_wowza extends moodle_text_filter {
       
 }        
         function filter_wowza_callback($link) {
-            global $CFG, $PAGE;
+            global $CFG, $PAGE; echo("\n<!--link: "); var_dump($link); echo("-->");
+             // Check if we ignore it.
+            if (preg_match('/class="[^"]*nomediaplugin/i', $link[0])) {
+               return $link[0];
+            }
+        
             static $count = 0;
-
             $count++;
             $id = 'filter_wowza_'.time().'_'.$count; //we need something unique because it might be stored in text cache
 
@@ -64,7 +69,7 @@ class filter_wowza extends moodle_text_filter {
         */
             $autosize = false;
             if (!$width and !$height) { // There isn't an automatic video size detection yet
-                $width    = 640;
+                $width    = 480;
                 $height   = 360;
                 $autosize = true;
             }
@@ -72,7 +77,9 @@ class filter_wowza extends moodle_text_filter {
             // part the url in its elements
             $completeURL = parse_url($link[1]); 
             $streamerprotokoll = $completeURL["scheme"] . "://";
-            $port = ( $completeURL["port"] ) ? ":" . $completeURL["port"] : ":1935";
+           // $port = ( $completeURL["port"] ) ? ":" . $completeURL["port"] : ":1935";
+            $port = $completeURL["port"];
+            if($port!="")$port=":".$port;
             $streamer= $completeURL["host"] . $port .substr($completeURL["path"],0,strpos($completeURL["path"],"/",1)+1);
             $mediapath = substr($completeURL["path"],strpos($completeURL["path"],"/",1)+1);
             $mediatype = (stripos($mediapath,"mp4:")===false) ? "mp4:" : ""; 
@@ -88,13 +95,22 @@ class filter_wowza extends moodle_text_filter {
             //    $ios = true;
             //$client ='iPodMozilla/5.0 (X11; Linux x86_64) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.57 Safari/536.11';
             if(!(stripos($client,"iPod")===false)||!(stripos($client,"iPad")===false)||!(stripos($client,"iPhone")===false)){
+				if($streamerprotokoll=="rtmp://"){
 $output = <<<EOT
     <video controls width=$width height=$height src="http://{$streamer}_definst_/$mediatype$mediapath/playlist.m3u8" poster="$posterimage"/>
     
 EOT;
+			} else {
+				$output = <<<EOT
+		<video controls width=$width height=$height 
+		src="http://{$streamer}_definst_/$mediapath" poster="$posterimage"/>
+    
+EOT;
+			};
 } else {
+	if($streamerprotokoll=="rtmp://"){
 $output = <<<EOT
-<p><object  id="player" data="$playerpath/flowplayer-3.2.14.swf" type="application/x-shockwave-flash" width=$width height=$height>
+<p><object  id="$id" data="$playerpath/flowplayer-3.2.14.swf" type="application/x-shockwave-flash" width=$width height=$height>
 <param name="allowfullscreen" value="true">
 <param name="allowscriptaccess" value="always">
 <param name="quality" value="high">
@@ -116,6 +132,25 @@ $output = <<<EOT
 				">
 </object></p>
 EOT;
+	} else {
+		$output = <<<EOT
+<p><object  id="$id" data="$playerpath/flowplayer-3.2.14.swf" type="application/x-shockwave-flash" width=$width height=$height>
+<param name="allowfullscreen" value="true">
+<param name="allowscriptaccess" value="always">
+<param name="quality" value="high">
+<param name="cachebusting" value="false">
+<param name="bgcolor" value="#000000">
+<param name="flashvars" value="config={
+				'clip':{
+					'url':'$streamerprotokoll$streamer$mediapath',
+				    'autoPlay':false
+				}, 'canvas': {
+        'backgroundImage': '$posterimage' }
+				}
+				">
+</object></p>
+EOT;
+	};
 } 
             return $output;
             
