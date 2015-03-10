@@ -33,6 +33,7 @@ IMPORTANT: To use this filter you must use the rtmp protokol and a MP4 video.
 
     <a href="rtmp://streaming.server.de/vod/myvideo.mp4?d=640x360">
 or  
+
     <a href="rtmp://streaming.server.de/vod/myvideo.mp4#d=640x360">
 
 This example defines the video canvas to 640 pixel width and 360 pixel height. 
