@@ -23,18 +23,18 @@ Look for a filter named Wowza Connector and switch the state option to 'on'
 
 ### Basic:
 
-'<a href="rtmp://streaming.server.de/vod/myvideo.mp4">'
+<pre><code><a href="rtmp://streaming.server.de/vod/myvideo.mp4"></code></pre>
 This is the normal syntax to embed a media file in moodle.  
 IMPORTANT: To use this filter you must use the rtmp protokol and a MP4 video.  
 
 ### Embed with defining the video size
 
-'<a href="rtmp://streaming.server.de/vod/myvideo.mp4?d=640x360">' or  
-'<a href="rtmp://streaming.server.de/vod/myvideo.mp4#d=640x360">'
+<pre><code><a href="rtmp://streaming.server.de/vod/myvideo.mp4?d=640x360"></code></pre> or  
+<pre><code><a href="rtmp://streaming.server.de/vod/myvideo.mp4#d=640x360"></code></pre>
 
 This example defines the video canvas to 640 pixel width and 360 pixel height. 
 
 ### Poster image for the video canvas
 
-'<a href="rtmp://streaming.server.de/vod/myvideo.mp4><img src="http://moodle.server.com/image.png" /></a>'
+<pre><code><a href="rtmp://streaming.server.de/vod/myvideo.mp4><img src="http://moodle.server.com/image.png" /></a></code></pre>
 
