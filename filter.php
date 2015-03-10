@@ -1,7 +1,7 @@
 <?php
 defined('MOODLE_INTERNAL') || die();
 
-class filter_wowza extends moodle_text_filter {
+class filter_mowoco extends moodle_text_filter {
     public function filter($text, array $options = array()) {
         global $CFG, $PAGE;
 
@@ -13,13 +13,13 @@ class filter_wowza extends moodle_text_filter {
             // performance shortcut - all regexes bellow end with the </a> tag,
             // if not present nothing can match
             return $text;
-        } /*
-        if (stripos($text, 'rtmp') === false) {
-            return $text;   // If it lacks rtmp, it can't be the Wowza sever.
-        } */
+        } 
+        if (stripos($text, 'lrz.de') === false) {
+            return $text;   // If it lacks lrz, it can't be the Wowza sever.
+        } 
 
         $newtext = $text; // we need to return the original value if regex fails!
-echo("<!--"); var_dump($text); echo("-->");
+
        // $search = '/<a\s[^>]*href="([^"#\?]+\.(mp4|m4v)([#\?][^"]*)?)"[^>]*>(.*)<\/a>/is'; 
         $search = '~<a\s[^>]*href="([^"]*(?:\.(mp4|m4v))[^"]*)"[^>]*>([^>]*)</a>~is';
         $newtext = preg_replace_callback($search, 'filter_wowza_callback', $newtext);
@@ -34,7 +34,7 @@ echo("<!--"); var_dump($text); echo("-->");
       
 }        
         function filter_wowza_callback($link) {
-            global $CFG, $PAGE; echo("\n<!--link: "); var_dump($link); echo("-->");
+            global $CFG, $PAGE; 
              // Check if we ignore it.
             if (preg_match('/class="[^"]*nomediaplugin/i', $link[0])) {
                return $link[0];
@@ -59,7 +59,7 @@ echo("<!--"); var_dump($text); echo("-->");
                 $width  = $matches[1];
                 $height = $matches[2];
                 $url = str_replace($matches[0], '', $link[1]); 
-            }
+            } 
 
             $link[1] = str_replace('&amp;', '&', $link[1]);
             /*   $link[1] = clean_param($link[1], PARAM_URL);
@@ -72,18 +72,19 @@ echo("<!--"); var_dump($text); echo("-->");
                 $width    = 480;
                 $height   = 360;
                 $autosize = true;
-            }
+            } 
 
             // part the url in its elements
             $completeURL = parse_url($link[1]); 
-            $streamerprotokoll = $completeURL["scheme"] . "://";
-           // $port = ( $completeURL["port"] ) ? ":" . $completeURL["port"] : ":1935";
-            $port = $completeURL["port"];
-            if($port!="")$port=":".$port;
+            $streamerprotokoll = $completeURL["scheme"] . "://"; 
+            $port = ( $completeURL["port"] ) ? ":" . $completeURL["port"] : ":1935";
+           // $port = $completeURL["port"];
+            //if($port!="")$port=":".$port; 
+            $port=":1935"; // I hate myself for doing this
             $streamer= $completeURL["host"] . $port .substr($completeURL["path"],0,strpos($completeURL["path"],"/",1)+1);
             $mediapath = substr($completeURL["path"],strpos($completeURL["path"],"/",1)+1);
             $mediatype = (stripos($mediapath,"mp4:")===false) ? "mp4:" : ""; 
-            $playerpath = $CFG->wwwroot . '/filter/wowza'; 
+            $playerpath = $CFG->wwwroot . '/filter/mowoco'; 
         
             unset($matches);
             $posterimage="";
@@ -91,10 +92,7 @@ echo("<!--"); var_dump($text); echo("-->");
                 $posterimage = $matches[1][0];
             }
             $client = $_SERVER["HTTP_USER_AGENT"]; 
-            //if(!(stripos($client,"iPod")===false)||!(stripos($client,"iPad")===false)||!(stripos($client,"iPhone")===false)){
-            //    $ios = true;
-            //$client ='iPodMozilla/5.0 (X11; Linux x86_64) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.57 Safari/536.11';
-            if(!(stripos($client,"iPod")===false)||!(stripos($client,"iPad")===false)||!(stripos($client,"iPhone")===false)){
+                        if(!(stripos($client,"iPod")===false)||!(stripos($client,"iPad")===false)||!(stripos($client,"iPhone")===false)){
 				if($streamerprotokoll=="rtmp://"){
 $output = <<<EOT
     <video controls width=$width height=$height src="http://{$streamer}_definst_/$mediatype$mediapath/playlist.m3u8" poster="$posterimage"/>
