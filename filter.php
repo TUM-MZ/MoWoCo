@@ -20,8 +20,9 @@ class filter_mowoco extends moodle_text_filter {
 
         $newtext = $text; // we need to return the original value if regex fails!
 
-       // $search = '/<a\s[^>]*href="([^"#\?]+\.(mp4|m4v)([#\?][^"]*)?)"[^>]*>(.*)<\/a>/is'; 
-        $search = '~<a\s[^>]*href="([^"]*(?:\.(mp4|m4v))[^"]*)"[^>]*>([^>]*)</a>~is';
+      $search = '/<a\s[^>]*href="([^"#\?]+\.(mp4|m4v)([#\?][^"]*)?)"[^>]*>(.*)<\/a>/is'; 
+        //$search = '~<a\s[^>]*href="([^"]*(?:\.(mp4|m4v))[^"]*)"[^>]*>([^>]*)</a>~is';
+                  
         $newtext = preg_replace_callback($search, 'filter_wowza_callback', $newtext);
          
         if (empty($newtext) or $newtext === $text) {
@@ -39,7 +40,7 @@ class filter_mowoco extends moodle_text_filter {
             if (preg_match('/class="[^"]*nomediaplugin/i', $link[0])) {
                return $link[0];
             }
-        
+       echo "<p>";var_dump($link);echo"</p>"; //************************************************
             static $count = 0;
             $count++;
             $id = 'filter_wowza_'.time().'_'.$count; //we need something unique because it might be stored in text cache
@@ -88,9 +89,9 @@ class filter_mowoco extends moodle_text_filter {
         
             unset($matches);
             $posterimage="";
-            if(preg_match_all('/<img\s[^>]*src="([^"#\?]+\.(gif|jpg|png))"[^>]*\/>/is',$link[4],$matches)>=1){
+            if(preg_match_all('/<img\s[^>]*src="([^"#\?]+\.(gif|jpg|png))"[^>]*(\/>|>)/is',$link[4],$matches)>=1){
                 $posterimage = $matches[1][0];
-            }
+            }  echo "<p>ggg $posterimage</p>"; //************************************************
             $client = $_SERVER["HTTP_USER_AGENT"]; 
                         if(!(stripos($client,"iPod")===false)||!(stripos($client,"iPad")===false)||!(stripos($client,"iPhone")===false)){
 				if($streamerprotokoll=="rtmp://"){
