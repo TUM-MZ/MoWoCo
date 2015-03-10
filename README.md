@@ -1,22 +1,22 @@
 # Moodle Wowza Connector (MoWoCo)
 
-This is a filter for Moodle 2+. It expands the built-in mediaplugin to connect to an external Wowza streaming server. It takes advantage of the different type of streaming, which Wowza streaming server supports.
+This is a filter for Moodle 2+. It expands the built-in mediaplugin to connect to an external Wowza streaming server. It takes advantage of the different type of streaming, which Wowza streaming server supports. Currently it support Desktop computer by Flash and iOS devices by HTML5. 
 
 
 ## Installation
 
-Put all the files in a own directory(e.g. wowza) under filter in your moodle installation.
+Put all the files in a own directory(e.g. mowoco) under filter in your moodle installation.
 
-cd moodle/filter
-mkdir wowza
-cd wowza
+<pre><code>cd moodle/filter  
+mkdir wowza  
+cd wowza</code></pre>
 #Here you have to place the files
 
 ## Setup
 
 Activate the Wowza Connector.
 
-Go there: Moodle website administration > plugins > filter > overview
+Go there: Moodle website administration > plugins > filter > overview  
 Look for a filter named Wowza Connector and switch the state option to 'on'
 
 ## How to use the filter
@@ -24,14 +24,12 @@ Look for a filter named Wowza Connector and switch the state option to 'on'
 ### Basic:
 
 '<a href="rtmp://streaming.server.de/vod/myvideo.mp4">'
-This is the normal syntax to embed a media file in moodle.
-IMPORTANT: To use this filter you must use the rtmp protokol and a MP4 video.
-
-It's currently the most common way to stream a video. It also works on iOS devices because the filter will be aware of this case and switch automatically to an iOS compatible streaming.
+This is the normal syntax to embed a media file in moodle.  
+IMPORTANT: To use this filter you must use the rtmp protokol and a MP4 video.  
 
 ### Embed with defining the video size
 
-'<a href="rtmp://streaming.server.de/vod/myvideo.mp4?d=640x360">' or
+'<a href="rtmp://streaming.server.de/vod/myvideo.mp4?d=640x360">' or  
 '<a href="rtmp://streaming.server.de/vod/myvideo.mp4#d=640x360">'
 
 This example defines the video canvas to 640 pixel width and 360 pixel height. 
