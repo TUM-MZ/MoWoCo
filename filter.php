@@ -14,7 +14,7 @@ class filter_mowoco extends moodle_text_filter {
             // if not present nothing can match
             return $text;
         } 
-        if (stripos($text, 'lrz.de') === false) {
+        if ((stripos($text, 'lrz.de') === false)&&(stripos($text, 'lrz-muenchen.de') === false)) {
             return $text;   // If it lacks lrz, it can't be the Wowza sever.
         } 
 
@@ -22,14 +22,14 @@ class filter_mowoco extends moodle_text_filter {
 
       $search = '/<a\s[^>]*href="([^"#\?]+\.(mp4|m4v)([#\?][^"]*)?)"[^>]*>(.*)<\/a>/is'; 
         //$search = '~<a\s[^>]*href="([^"]*(?:\.(mp4|m4v))[^"]*)"[^>]*>([^>]*)</a>~is';
-                  
+            
         $newtext = preg_replace_callback($search, 'filter_wowza_callback', $newtext);
          
         if (empty($newtext) or $newtext === $text) {
             // error or not filtered
             unset($newtext);
             return $text;
-        }
+        } 
         return $newtext;
      }   
       
@@ -40,7 +40,7 @@ class filter_mowoco extends moodle_text_filter {
             if (preg_match('/class="[^"]*nomediaplugin/i', $link[0])) {
                return $link[0];
             }
-      
+      echo("<!--"); var_dump($link); echo("-->");
             static $count = 0;
             $count++;
             $id = 'filter_wowza_'.time().'_'.$count; //we need something unique because it might be stored in text cache
